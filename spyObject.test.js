@@ -157,6 +157,9 @@ Deno.test('example works', () => {
     b: {
       c: 2,
     },
+    fn() {
+      return this.b.c;
+    },
   };
   const spier = spy();
 
@@ -179,6 +182,10 @@ Deno.test('example works', () => {
       spier(`delete at path: /${path.join('/')}`);
       spier('old value:', target[prop]);
     },
+    call(path, target, prop, args, returned) {
+      spier('returned:', returned);
+      spier('called width', args);
+    },
   });
 
   spied.a = 2;
@@ -199,4 +206,33 @@ Deno.test('example works', () => {
   assertEquals(spier.calls.length, 7);
   assertEquals(spier.calls[5].args, [`delete at path: /a`]);
   assertEquals(spier.calls[6].args, [`old value:`, 2]);
+
+  assertEquals(spied.fn(1, 2), 2);
+  assertEquals(spier.calls.length, 10);
+  assertEquals(spier.calls[7].args, [
+    `read undefined at path: /fn`,
+  ]);
+  assertEquals(spier.calls[8].args, [`returned:`, 2]);
+  assertEquals(spier.calls[9].args, [`called width`, [1, 2]]);
+});
+
+Deno.test('spy method calls', () => {
+  const data = {
+    fn: () => 'hello',
+  };
+  const spier = spy();
+
+  const spied = spyObject(data, {
+    call(path, target, prop, args, returned) {
+      spier(`call at /${path.join('/')}`);
+      spier(`call args: ${args}`);
+      spier(`returned: ${returned}`);
+    },
+  });
+
+  assertEquals(spied.fn(1, 2), 'hello');
+  assertEquals(spier.calls.length, 3);
+  assertEquals(spier.calls[0].args, [`call at /fn`]);
+  assertEquals(spier.calls[1].args, [`call args: 1,2`]);
+  assertEquals(spier.calls[2].args, [`returned: hello`]);
 });

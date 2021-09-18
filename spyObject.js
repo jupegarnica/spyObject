@@ -1,26 +1,27 @@
 const isObject = (obj) =>
   typeof obj === 'object' && obj !== null;
 
-const get = (target, key, conf, path) => {
-  let value = target[key];
+const get = (target, prop, handler, path) => {
+  let value = target[prop];
   if (isObject(value)) {
-    value = spyObject(value, conf, path);
+    value = spyObject(value, handler, path);
+  } else if (
+    Object.hasOwnProperty.call(target, prop) &&
+    typeof value === 'function'
+  ) {
+    const baseFn = value.bind(target);
+
+    value = function (...args) {
+      const returned = baseFn(...args);
+      handler.call?.(path, target, prop, args, returned);
+      return returned;
+    };
   }
   return value;
 };
 
 export const spyObject = (obj, handler = {}, basePath = []) => {
   const _handler = {};
-
-  // for (const key in handler) {
-  //   _handler[key] = (target, prop, ...args) =>
-  //     handler[key](
-  //       basePath.concat(prop),
-  //       target,
-  //       prop,
-  //       ...args,
-  //     ) ?? true;
-  // }
 
   _handler.get = (target, prop) => {
     const nextBasePath = basePath.concat(prop);

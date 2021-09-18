@@ -4,6 +4,9 @@ const data = {
   b: {
     c: 2,
   },
+  fn() {
+    return this.b.c;
+  },
 };
 
 const spied = spyObject(data, {
@@ -25,6 +28,10 @@ const spied = spyObject(data, {
     console.log(`delete at path: /${path.join('/')}`);
     console.log('old value:', target[prop]);
   },
+  call(path, target, prop, args, returned) {
+    console.log('returned:', returned);
+    console.log('called width', args);
+  },
 });
 
 spied.a = 2;
@@ -32,3 +39,4 @@ spied.a = 2;
 spied.b.c;
 
 delete spied.a;
+spied.fn(1, 2);
