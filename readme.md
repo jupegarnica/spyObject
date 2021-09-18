@@ -39,7 +39,7 @@ const spied = spyObject(data, {
   },
   call(path, target, prop, args, returned) {
     console.log('returned:', returned);
-    console.log('called width', args);
+    console.log('called with', args);
   },
 });
 
@@ -48,6 +48,7 @@ spied.a = 2;
 spied.b.c;
 
 delete spied.a;
+
 spied.fn(1, 2);
 
 
@@ -63,7 +64,7 @@ spied.fn(1, 2);
 // old value: 2
 // read undefined at path: /fn
 // returned: 2
-// called width [ 1, 2 ]
+// called with [ 1, 2 ]
 ```
 
 
