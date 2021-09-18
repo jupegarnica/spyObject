@@ -2,4 +2,6 @@ scripts:
   test: deno test
   test-watch: deno test --watch
   example: deno run --watch example.js
-  # release:
+  release:
+    - git tag v0.3.1 main
+    - git push --tags

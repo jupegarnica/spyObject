@@ -5,7 +5,7 @@ A tool to subscribe to deep object changes
 ## usage
 
 ```js
-import {spyObject} from 'https://deno.land/x/spy_object@v0.2.0/spyObject.js'
+import {spyObject} from 'https://deno.land/x/spy_object@v0.3.0/spyObject.js'
 
 const data = {
   a: 1,
