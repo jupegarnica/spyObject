@@ -142,9 +142,8 @@ Deno.test('works delete config', () => {
   };
   const spier = spy();
   const clone = spyObject(data, {
-    deleteProperty(path) {
+    delete(path) {
       spier(path);
-      // return true;
     },
   });
   delete clone.b.c.d;
@@ -152,23 +151,52 @@ Deno.test('works delete config', () => {
   assertEquals(spier.calls[0].args, [['b', 'c', 'd']]);
 });
 
-Deno.test('spy method', () => {
+Deno.test('example works', () => {
   const data = {
     a: 1,
     b: {
-      c: {
-        fn: () => 2,
-      },
+      c: 2,
     },
   };
   const spier = spy();
-  const clone = spyObject(data, {
-    apply(path) {
-      spier(path);
-      // return true;
+
+  const spied = spyObject(data, {
+    set(path, target, prop, value) {
+      spier(`set ${value} at /${path.join('/')}`);
+      spier('old value:', target[prop]);
+      spier('new value:', value);
+    },
+
+    get(path, target, prop) {
+      spier(
+        `read ${JSON.stringify(
+          target[prop],
+        )} at path: /${path.join('/')}`,
+      );
+    },
+
+    delete(path, target, prop) {
+      spier(`delete at path: /${path.join('/')}`);
+      spier('old value:', target[prop]);
     },
   });
-  delete clone.b.c.d;
-  assertEquals(spier.calls.length, 1);
-  assertEquals(spier.calls[0].args, [['b', 'c', 'fn']]);
+
+  spied.a = 2;
+  assertEquals(data.a, 2);
+  assertEquals(spier.calls.length, 3);
+  assertEquals(spier.calls[0].args, [`set 2 at /a`]);
+  assertEquals(spier.calls[1].args, [`old value:`, 1]);
+  assertEquals(spier.calls[2].args, [`new value:`, 2]);
+
+  spied.b.c;
+  assertEquals(spier.calls.length, 5);
+  assertEquals(spier.calls[3].args, [
+    `read {"c":2} at path: /b`,
+  ]);
+  assertEquals(spier.calls[4].args, [`read 2 at path: /b/c`]);
+
+  delete spied.a;
+  assertEquals(spier.calls.length, 7);
+  assertEquals(spier.calls[5].args, [`delete at path: /a`]);
+  assertEquals(spier.calls[6].args, [`old value:`, 2]);
 });

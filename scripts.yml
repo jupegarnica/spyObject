@@ -1,3 +1,5 @@
 scripts:
   test: deno test
   test-watch: deno test --watch
+  example: deno run --watch example.js
+  # release:
