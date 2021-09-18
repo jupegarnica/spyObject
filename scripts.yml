@@ -1,0 +1,3 @@
+scripts:
+  test: deno test
+  test-watch: deno test --watch
